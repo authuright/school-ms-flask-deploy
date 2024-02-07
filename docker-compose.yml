@@ -1,0 +1,47 @@
+version: "3"
+name: school-ms-system
+services:
+  flask:
+    container_name: Server
+    restart: always
+    build:
+      context: .
+      dockerfile: services/server/Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://authuright:authuright@postgres:5432/pouk_dbms
+    networks:
+      - school_ms_system
+    volumes:
+      - ./software:/software
+
+  postgres:
+    image: postgres:latest
+    container_name: Database
+    restart: always
+    environment:
+      POSTGRES_DB: pouk_dbms
+      POSTGRES_USER: authuright
+      POSTGRES_PASSWORD: authuright
+    ports:
+      - "5432:5432"
+    networks:
+      - school_ms_system
+
+  nginx:
+    container_name: Nginx
+    restart: always
+    build:
+      context: .
+      dockerfile: services/nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - flask
+
+networks:
+  school_ms_system:
+    driver: bridge
